@@ -36,7 +36,7 @@ class ArticleService(
         return ArticleResponse.from(article)
     }
 
-    fun read(articleId: Long) :ArticleResponse{
+    fun read(articleId: Long): ArticleResponse {
         val article = articleRepository.findByIdOrNull(articleId) ?: throw IllegalArgumentException()
         return ArticleResponse.from(article)
     }
@@ -49,9 +49,22 @@ class ArticleService(
         page: Long,
         pageSize: Long,
     ): ArticlePageResponse {
-        val articles = articleRepository.findAll(boardId, (page - 1) * pageSize, pageSize).map { ArticleResponse.from(it) }
+        val articles =
+            articleRepository.findAll(boardId, (page - 1) * pageSize, pageSize).map { ArticleResponse.from(it) }
         val count = articleRepository.count(boardId, PageLimitCalculator.calculatePageLimit(page, pageSize, 10L))
 
         return ArticlePageResponse(articles, count)
+    }
+
+    fun readAllInfiniteScroll(
+        boardId: Long,
+        pageSize: Long,
+        lastArticleId: Long?,
+    ): List<ArticleResponse> {
+        val articles = lastArticleId?.let{
+            articleRepository.findAllInfiniteScroll(boardId, pageSize, lastArticleId)
+        } ?:  articleRepository.findAllInfiniteScroll(boardId, pageSize)
+
+        return articles.map { ArticleResponse.from(it) }
     }
 }

@@ -5,6 +5,7 @@ import my.board.article.service.request.ArticleCreateRequest
 import my.board.article.service.request.ArticleUpdateRequest
 import my.board.article.service.response.ArticlePageResponse
 import my.board.article.service.response.ArticleResponse
+import org.springframework.core.ParameterizedTypeReference
 import org.springframework.web.client.RestClient
 
 class ArticleControllerTest : FunSpec({
@@ -70,6 +71,32 @@ class ArticleControllerTest : FunSpec({
         println("response.getArticleCount() = ${response.articleCount}")
 
         for(article in response.articles) {
+            println("articleId = ${article.articleId}")
+        }
+    }
+
+    test("readAllInfiniteScroll") {
+        val response = restClient.get()
+            .uri("/v1/articles/infinite-scroll?boardId=1&pageSize=5")
+            .retrieve()
+            .body(object : ParameterizedTypeReference<List<ArticleResponse>>() {})!!
+
+
+        println("firstPage")
+        for(article in response) {
+            println("articleId = ${article.articleId}")
+        }
+
+        val lastArticleId = response.last().articleId
+
+        val response2 = restClient.get()
+            .uri("/v1/articles/infinite-scroll?boardId=1&pageSize=5&lastArticleId=%s".format(lastArticleId))
+            .retrieve()
+            .body(object : ParameterizedTypeReference<List<ArticleResponse>>() {})!!
+
+
+        println("secondPage")
+        for(article in response2) {
             println("articleId = ${article.articleId}")
         }
     }
