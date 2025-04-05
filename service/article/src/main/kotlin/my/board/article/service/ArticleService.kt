@@ -1,12 +1,12 @@
 package my.board.article.service
 
-import my.board.common.snowflake.Snowflake
 import my.board.article.entity.Article
 import my.board.article.repository.ArticleRepository
 import my.board.article.service.request.ArticleCreateRequest
 import my.board.article.service.request.ArticleUpdateRequest
 import my.board.article.service.response.ArticlePageResponse
 import my.board.article.service.response.ArticleResponse
+import my.board.common.snowflake.Snowflake
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -15,12 +15,11 @@ import org.springframework.transaction.annotation.Transactional
 class ArticleService(
     private val articleRepository: ArticleRepository,
 ) {
-    private val snowflake = Snowflake()
 
     @Transactional
     fun create(request: ArticleCreateRequest): ArticleResponse {
         val article = articleRepository.save(
-            Article(snowflake.nextId(), request.boardId, request.writerId, request.title, request.content)
+            Article(Snowflake.nextId(), request.boardId, request.writerId, request.title, request.content)
         )
 
         return ArticleResponse.from(article)

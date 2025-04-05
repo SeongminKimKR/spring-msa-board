@@ -58,7 +58,7 @@ class ArticleControllerTest : FunSpec({
     }
 
     test("delete") {
-        val response = delete(166761214677094400L)
+        val response = delete(166800323129114624)
         println(response)
     }
 
