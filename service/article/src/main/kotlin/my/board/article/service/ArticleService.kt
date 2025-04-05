@@ -5,6 +5,7 @@ import my.board.article.entity.Article
 import my.board.article.repository.ArticleRepository
 import my.board.article.service.request.ArticleCreateRequest
 import my.board.article.service.request.ArticleUpdateRequest
+import my.board.article.service.response.ArticlePageResponse
 import my.board.article.service.response.ArticleResponse
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Service
@@ -42,4 +43,15 @@ class ArticleService(
 
     @Transactional
     fun delete(articleId: Long) = articleRepository.deleteById(articleId)
+
+    fun readAll(
+        boardId: Long,
+        page: Long,
+        pageSize: Long,
+    ): ArticlePageResponse {
+        val articles = articleRepository.findAll(boardId, (page - 1) * pageSize, pageSize).map { ArticleResponse.from(it) }
+        val count = articleRepository.count(boardId, PageLimitCalculator.calculatePageLimit(page, pageSize, 10L))
+
+        return ArticlePageResponse(articles, count)
+    }
 }
