@@ -4,6 +4,7 @@ plugins {
 rootProject.name = "spring-msa-board"
 
 include("common")
+include("common:snowflake")
 include("service")
 include("service:article")
 include("service:comment")
