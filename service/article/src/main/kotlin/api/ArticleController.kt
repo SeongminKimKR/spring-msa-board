@@ -1,4 +1,4 @@
-package my.board.article.controller
+package api
 
 import my.board.article.service.ArticleService
 import my.board.article.service.request.ArticleCreateRequest
