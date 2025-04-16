@@ -2,7 +2,7 @@ server.port: 9000
 
 spring:
   application:
-    name: spring-msa-board
+    name: spring-msa-board-article
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://127.0.0.1:3306/article
