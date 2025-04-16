@@ -3,6 +3,7 @@ package my.board.comment.service
 import my.board.comment.entity.Comment
 import my.board.comment.repository.CommentRepository
 import my.board.comment.service.request.CommentCreateRequest
+import my.board.comment.service.response.CommentPageResponse
 import my.board.comment.service.response.CommentResponse
 import my.board.common.snowflake.Snowflake
 import org.springframework.stereotype.Service
@@ -45,12 +46,37 @@ class CommentService(
     private fun delete(comment: Comment) {
         commentRepository.delete(comment)
 
-        if(!comment.isRoot()) {
+        if (!comment.isRoot()) {
             commentRepository.findById(comment.parentCommentId)
                 .filter(Comment::deleted)
                 .filter(not(this::hasChildren))
                 .ifPresent(this::delete)
         }
+    }
+
+    fun readAll(
+        articleId: Long,
+        page: Long,
+        pageSize: Long,
+    ): CommentPageResponse = CommentPageResponse(
+        commentRepository.findAll(articleId, (page - 1) * pageSize, pageSize)
+            .map(CommentResponse::from),
+        commentRepository.count(articleId, PageLimitCalculator.calculatePageLimit(page, pageSize, 10L)
+        ))
+
+    fun readAll(
+        articleId: Long,
+        lastParentCommentId: Long?,
+        lastCommentId: Long?,
+        limit: Long
+    ): List<CommentResponse> {
+        val comments = if(lastParentCommentId == null || lastCommentId == null) {
+            commentRepository.findAllInfiniteScroll(articleId, limit)
+        } else {
+            commentRepository.findAllInfiniteScroll(articleId, lastParentCommentId, lastCommentId, limit)
+        }
+
+        return comments.map(CommentResponse::from)
     }
 
     private fun hasChildren(comment: Comment): Boolean =

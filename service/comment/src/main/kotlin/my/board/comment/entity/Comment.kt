@@ -12,13 +12,16 @@ class Comment (
     @Id
     val commentId: Long,
     val content: String,
-    val parentCommentId: Long,
+    parentCommentId: Long?,
     val articleId: Long,
     val writerId: Long,
     val createdAt: LocalDateTime = LocalDateTime.now()
 ) {
+    val parentCommentId: Long = parentCommentId ?: commentId
+
     var deleted: Boolean = false
         protected set
+
     fun isRoot() = parentCommentId == commentId
 
     fun delete() {
