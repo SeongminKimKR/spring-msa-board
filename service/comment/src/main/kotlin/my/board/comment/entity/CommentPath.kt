@@ -26,9 +26,9 @@ class CommentPath(
 
     private fun increase(childrenTopPath: String): String {
         // 00000 00000
-        val lastChunk = path.substring(path.length - DEPTH_CHUNK_SIZE)
+        val lastChunk = childrenTopPath.substring(childrenTopPath.length - DEPTH_CHUNK_SIZE)
 
-        check(isChunkOverflowed(lastChunk)) { "chunk overflowed" }
+        check(!isChunkOverflowed(lastChunk)) { "chunk overflowed" }
 
         val charsetLength = CHARSET.length
         var value = 0
@@ -41,12 +41,12 @@ class CommentPath(
 
         var result = ""
 
-        for(i in 0..DEPTH_CHUNK_SIZE) {
+        for(i in 0 until DEPTH_CHUNK_SIZE) {
             result = CHARSET[value % charsetLength] + result
             value /= charsetLength
         }
 
-        return path.substring(0, path.length - DEPTH_CHUNK_SIZE) + result
+        return childrenTopPath.substring(0, childrenTopPath.length - DEPTH_CHUNK_SIZE) + result
     }
 
     private fun isChunkOverflowed(lastChunk: String) = MAX_CHUNK.equals(lastChunk)
@@ -61,7 +61,7 @@ class CommentPath(
         private val MAX_CHUNK = CHARSET[CHARSET.length - 1].toString().repeat(DEPTH_CHUNK_SIZE)
 
         fun from(path: String): CommentPath {
-            check(isDepthOverflowed(path)) { "depth overflowed" }
+            check(!isDepthOverflowed(path)) { "depth overflowed" }
 
             return CommentPath(path)
         }

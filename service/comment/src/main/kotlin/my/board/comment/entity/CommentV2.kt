@@ -4,7 +4,7 @@ import jakarta.persistence.Embedded
 import jakarta.persistence.Entity
 import jakarta.persistence.Id
 import jakarta.persistence.Table
-import my.board.comment.service.request.CommentCreateRequest
+import my.board.comment.service.request.CommentCreateRequestV2
 import java.time.LocalDateTime
 
 @Table(name = "comment_v2")
@@ -14,17 +14,15 @@ class CommentV2(
     val commentId: Long,
     val content: String,
     @Embedded
-    val path: CommentPath,
+    val commentPath: CommentPath,
     val articleId: Long,
     val writerId: Long,
     val createdAt: LocalDateTime = LocalDateTime.now(),
 ) {
-    val parentCommentId: Long = parentCommentId ?: commentId
-
     var deleted: Boolean = false
         protected set
 
-    fun isRoot() = parentCommentId == commentId
+    fun isRoot() = commentPath.isRoot() ?: false
 
     fun delete() {
         deleted = true
@@ -33,14 +31,14 @@ class CommentV2(
     companion object {
         fun from(
             id: Long,
-            parentCommentId: Long?,
-            request: CommentCreateRequest,
-        ) = Comment(
+            parentCommentPath: CommentPath,
+            request: CommentCreateRequestV2,
+        )= CommentV2 (
             commentId = id,
             content = request.content,
-            parentCommentId = parentCommentId ?: id,
             articleId = request.articleId,
             writerId = request.writerId,
+            commentPath = parentCommentPath
         )
     }
 }
