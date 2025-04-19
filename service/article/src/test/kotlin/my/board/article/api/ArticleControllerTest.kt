@@ -100,5 +100,29 @@ class ArticleControllerTest : FunSpec({
             println("articleId = ${article.articleId}")
         }
     }
+
+    test("count"){
+        val request = ArticleCreateRequest("hi", "my content", 2L, 1L)
+        val response = create(request)
+
+        val count1 = restClient.get()
+            .uri("/v1/articles/boards/${response!!.boardId}/count", )
+            .retrieve()
+            .body(Long::class.java)
+
+        println("count1 = $count1")
+
+        restClient.delete()
+            .uri("/v1/articles/{articleId}", response.articleId)
+            .retrieve()
+            .toBodilessEntity()
+
+        val count2 = restClient.get()
+            .uri("/v1/articles/boards/${response!!.boardId}/count", )
+            .retrieve()
+            .body(Long::class.java)
+
+        println("count2 = $count2")
+    }
 })
 

@@ -104,6 +104,29 @@ class CommentApiTestV2 : FunSpec() {
                 println("comment.commentId = ${comment.commentId}")
             }
         }
+
+        test("count") {
+            val response = create(CommentCreateRequestV2(2L, "my comment1", null, 1L))
+
+            val count1 = restClient.get()
+                .uri("/v2/comments/articles/${response!!.articleId}/count")
+                .retrieve()
+                .body(Long::class.java)
+
+            println("count1 = $count1")
+
+            restClient.delete()
+                .uri("/v2/comments/{commentId}", response.commentId)
+                .retrieve()
+                .toBodilessEntity()
+
+            val count2 = restClient.get()
+                .uri("/v2/comments/articles/${response!!.articleId}/count")
+                .retrieve()
+                .body(Long::class.java)
+
+            println("count2 = $count2")
+        }
     }
 }
 

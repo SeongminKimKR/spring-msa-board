@@ -1,8 +1,10 @@
 package my.board.comment.service
 
+import my.board.comment.entity.ArticleCommentCount
 import my.board.comment.entity.Comment
 import my.board.comment.entity.CommentPath
 import my.board.comment.entity.CommentV2
+import my.board.comment.repository.ArticleCommentCountRepository
 import my.board.comment.repository.CommentRepositoryV2
 import my.board.comment.service.request.CommentCreateRequestV2
 import my.board.comment.service.response.CommentPageResponseV2
@@ -17,6 +19,7 @@ import java.util.function.Predicate.not
 @Service
 class CommentServiceV2(
     private val commentRepository: CommentRepositoryV2,
+    private val articleCommentCountRepository: ArticleCommentCountRepository,
 ) {
 
     @Transactional
@@ -33,6 +36,12 @@ class CommentServiceV2(
                 request
             )
         )
+
+        val result = articleCommentCountRepository.increase(request.articleId)
+
+        if(result == 0) {
+            articleCommentCountRepository.save(ArticleCommentCount(request.articleId, 1L))
+        }
 
         return CommentResponseV2.from(comment)
     }
@@ -52,8 +61,9 @@ class CommentServiceV2(
                 } else {
                     delete(comment)
                 }
-
             }
+
+
     }
 
     fun readAll(
@@ -66,6 +76,7 @@ class CommentServiceV2(
         commentCount = commentRepository.count(
             articleId,
             PageLimitCalculator.calculatePageLimit(page, pageSize, 10L)
+//            count(articleId) <- 가능
         )
     )
 
@@ -79,6 +90,10 @@ class CommentServiceV2(
     } ?: commentRepository.findAllInfiniteScroll(articleId, pageSize)
         .map(CommentResponseV2::from)
 
+    fun count(articleId: Long): Long = articleCommentCountRepository.findById(articleId)
+        .map(ArticleCommentCount::commentCount)
+        .orElse(0L)
+
     private fun hasChildren(comment: CommentV2): Boolean {
         return commentRepository.findDescendantTopPath(
             comment.articleId,
@@ -88,6 +103,7 @@ class CommentServiceV2(
 
     private fun delete(comment: CommentV2) {
         commentRepository.delete(comment)
+        articleCommentCountRepository.decrease(comment.articleId)
 
         if (!comment.isRoot()) {
             commentRepository.findByPath(comment.commentPath.getParentPath())

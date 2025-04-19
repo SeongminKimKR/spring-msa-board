@@ -49,4 +49,7 @@ class ArticleController(
     fun delete(
         @PathVariable articleId: Long,
     ): Unit = articleService.delete(articleId)
+
+    @GetMapping("/v1/articles/boards/{boardId}/count")
+    fun count(@PathVariable boardId: Long): Long = articleService.count(boardId)
 }

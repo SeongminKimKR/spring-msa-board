@@ -1,7 +1,9 @@
 package my.board.article.service
 
 import my.board.article.entity.Article
+import my.board.article.entity.BoardArticleCount
 import my.board.article.repository.ArticleRepository
+import my.board.article.repository.BoardArticleCountRepository
 import my.board.article.service.request.ArticleCreateRequest
 import my.board.article.service.request.ArticleUpdateRequest
 import my.board.article.service.response.ArticlePageResponse
@@ -14,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional
 @Service
 class ArticleService(
     private val articleRepository: ArticleRepository,
+    private val boardArticleCountRepository: BoardArticleCountRepository,
 ) {
 
     @Transactional
@@ -21,6 +24,12 @@ class ArticleService(
         val article = articleRepository.save(
             Article(Snowflake.nextId(), request.boardId, request.writerId, request.title, request.content)
         )
+
+        val result = boardArticleCountRepository.increase(request.boardId)
+
+        if(result == 0) {
+            boardArticleCountRepository.save(BoardArticleCount(request.boardId, 1L))
+        }
 
         return ArticleResponse.from(article)
     }
@@ -41,7 +50,14 @@ class ArticleService(
     }
 
     @Transactional
-    fun delete(articleId: Long) = articleRepository.deleteById(articleId)
+    fun delete(articleId: Long) {
+        articleRepository.findById(articleId)
+            .orElseThrow()
+            .let {
+                articleRepository.delete(it)
+                boardArticleCountRepository.decrease(it.boardId)
+            }
+    }
 
     fun readAll(
         boardId: Long,
@@ -66,4 +82,8 @@ class ArticleService(
 
         return articles.map { ArticleResponse.from(it) }
     }
+
+    fun count(boardId: Long): Long = boardArticleCountRepository.findById(boardId)
+        .map(BoardArticleCount::articleCount)
+        .orElse(0L)
 }
