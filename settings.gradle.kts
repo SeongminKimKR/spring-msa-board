@@ -5,6 +5,8 @@ rootProject.name = "spring-msa-board"
 
 include("common")
 include("common:snowflake")
+include("common:event")
+include("common:data-serializer")
 include("service")
 include("service:article")
 include("service:comment")
