@@ -34,7 +34,7 @@ enum class EventType(
 
         fun from(type: String): EventType {
             try {
-                return valueOf(type!!)
+                return valueOf(type)
             } catch (e: Exception) {
                 logger.error("[EventType.from] type={}", type, e)
                 throw IllegalArgumentException("Invalid type=$type")

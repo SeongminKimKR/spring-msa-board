@@ -30,11 +30,7 @@ class Event<T : EventPayload>(
             val payloadClass = eventType.payloadClass
             val payload = deserialize(eventRaw.payload, payloadClass)
 
-            return Event(
-                eventId = eventRaw.eventId,
-                type = eventType,
-                payload = payload
-            )
+            return of(eventRaw.eventId, eventType, payload)
         }
 
         data class EventRaw(
