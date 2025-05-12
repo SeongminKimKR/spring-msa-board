@@ -20,7 +20,7 @@ class SnowflakeTest : FunSpec({
         val executor = Executors.newFixedThreadPool(threadCount)
         val futures = (1..repeatCount).map {
             executor.submit(Callable {
-                generateIdList(Snowflake, idCount)
+                generateIdList(Snowflake(), idCount)
             })
         }
 
@@ -48,7 +48,7 @@ class SnowflakeTest : FunSpec({
         val start = System.nanoTime()
         repeat(repeatCount) {
             executor.submit {
-                generateIdList(Snowflake, idCount)
+                generateIdList(Snowflake(), idCount)
                 latch.countDown()
             }
         }

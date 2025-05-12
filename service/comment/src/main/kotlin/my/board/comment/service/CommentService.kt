@@ -14,12 +14,14 @@ import java.util.function.Predicate.not
 class CommentService(
     private val commentRepository: CommentRepository,
 ) {
+    private val snowflake = Snowflake()
+
     @Transactional
     fun create(
         request: CommentCreateRequest,
     ): CommentResponse {
         val parent = findParent(request)
-        val comment = commentRepository.save(Comment.from(Snowflake.nextId(), parent?.commentId, request))
+        val comment = commentRepository.save(Comment.from(snowflake.nextId(), parent?.commentId, request))
 
         return CommentResponse.from(comment)
     }

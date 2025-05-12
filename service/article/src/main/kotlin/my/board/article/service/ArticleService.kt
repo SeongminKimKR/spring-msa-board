@@ -18,11 +18,12 @@ class ArticleService(
     private val articleRepository: ArticleRepository,
     private val boardArticleCountRepository: BoardArticleCountRepository,
 ) {
+    private val snowflake = Snowflake()
 
     @Transactional
     fun create(request: ArticleCreateRequest): ArticleResponse {
         val article = articleRepository.save(
-            Article(Snowflake.nextId(), request.boardId, request.writerId, request.title, request.content)
+            Article(snowflake.nextId(), request.boardId, request.writerId, request.title, request.content)
         )
 
         val result = boardArticleCountRepository.increase(request.boardId)

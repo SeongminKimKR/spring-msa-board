@@ -14,6 +14,8 @@ class ArticleLikeService(
     private val articleLikeRepository: ArticleLikeRepository,
     private val articleLikeCountRepository: ArticleLikeCountRepository,
 ) {
+    private val snowflake = Snowflake()
+
     fun read(
         articleId: Long,
         userId: Long,
@@ -30,7 +32,7 @@ class ArticleLikeService(
         userId: Long,
     ) {
         articleLikeRepository.save(
-            ArticleLike.from(Snowflake.nextId(), articleId, userId)
+            ArticleLike.from(snowflake.nextId(), articleId, userId)
         )
 
         val result = articleLikeCountRepository.increase(articleId)
@@ -63,7 +65,7 @@ class ArticleLikeService(
         userId: Long,
     ) {
         articleLikeRepository.save(
-            ArticleLike.from(Snowflake.nextId(), articleId, userId)
+            ArticleLike.from(snowflake.nextId(), articleId, userId)
         )
 
         articleLikeCountRepository.findLockedByArticleId(articleId)
@@ -92,7 +94,7 @@ class ArticleLikeService(
         userId: Long,
     ) {
         articleLikeRepository.save(
-            ArticleLike.from(Snowflake.nextId(), articleId, userId)
+            ArticleLike.from(snowflake.nextId(), articleId, userId)
         )
 
         articleLikeCountRepository.findById(articleId)

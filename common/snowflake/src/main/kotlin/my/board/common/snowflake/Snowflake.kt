@@ -2,23 +2,7 @@ package my.board.common.snowflake
 
 import java.util.random.RandomGenerator
 
-object Snowflake {
-    const val UNUSED_BITS: Int = 1
-    const val EPOCH_BITS: Int = 41
-    const val NODE_ID_BITS: Int = 10
-    const val SEQUENCE_BITS: Int = 12
-
-    const val maxNodeId: Long = (1L shl NODE_ID_BITS) - 1
-    const val maxSequence: Long = (1L shl SEQUENCE_BITS) - 1
-
-    private val nodeId = RandomGenerator.getDefault().nextLong(maxNodeId + 1)
-
-    // UTC = 2024-01-01T00:00:00Z
-    private const val startTimeMillis = 1704067200000L
-
-    private var lastTimeMillis = startTimeMillis
-    private var sequence = 0L
-
+class Snowflake {
     @Synchronized
     fun nextId(): Long {
         var currentTimeMillis = System.currentTimeMillis()
@@ -47,5 +31,23 @@ object Snowflake {
             currentTimestamp = System.currentTimeMillis()
         }
         return currentTimestamp
+    }
+
+    companion object {
+        const val UNUSED_BITS: Int = 1
+        const val EPOCH_BITS: Int = 41
+        const val NODE_ID_BITS: Int = 10
+        const val SEQUENCE_BITS: Int = 12
+
+        const val maxNodeId: Long = (1L shl NODE_ID_BITS) - 1
+        const val maxSequence: Long = (1L shl SEQUENCE_BITS) - 1
+
+        private val nodeId = RandomGenerator.getDefault().nextLong(maxNodeId + 1)
+
+        // UTC = 2024-01-01T00:00:00Z
+        private const val startTimeMillis = 1704067200000L
+
+        private var lastTimeMillis = startTimeMillis
+        private var sequence = 0L
     }
 }

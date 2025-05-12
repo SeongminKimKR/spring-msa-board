@@ -21,6 +21,7 @@ class CommentServiceV2(
     private val commentRepository: CommentRepositoryV2,
     private val articleCommentCountRepository: ArticleCommentCountRepository,
 ) {
+    private val snowflake = Snowflake()
 
     @Transactional
     fun create(request: CommentCreateRequestV2): CommentResponseV2 {
@@ -28,7 +29,7 @@ class CommentServiceV2(
         val parentCommentPath = parent?.commentPath ?: CommentPath.from("")
         val comment = commentRepository.save(
             CommentV2.from(
-                Snowflake.nextId(),
+                snowflake.nextId(),
                 parentCommentPath.createChildCommentPath(
                     commentRepository.findDescendantTopPath(request.articleId, parentCommentPath.path)
                         .orElse(null)
