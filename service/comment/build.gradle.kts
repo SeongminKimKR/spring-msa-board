@@ -7,6 +7,8 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     runtimeOnly("com.mysql:mysql-connector-j")
     implementation(project(":common:snowflake"))
+    implementation(project(":common:outbox-message-relay"))
+    implementation(project(":common:event"))
     testImplementation("io.mockk:mockk:1.13.4")
 }
 

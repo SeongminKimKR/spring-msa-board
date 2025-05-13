@@ -1,5 +1,9 @@
 package my.board.like.service
 
+import my.board.common.event.EventType
+import my.board.common.event.payload.ArticleLikedEventPayload
+import my.board.common.event.payload.ArticleUnlikedEventPayload
+import my.board.common.outboxmessagerelay.OutboxEventPublisher
 import my.board.common.snowflake.Snowflake
 import my.board.like.entity.ArticleLike
 import my.board.like.entity.ArticleLikeCount
@@ -13,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional
 class ArticleLikeService(
     private val articleLikeRepository: ArticleLikeRepository,
     private val articleLikeCountRepository: ArticleLikeCountRepository,
+    private val outboxEventPublisher: OutboxEventPublisher,
 ) {
     private val snowflake = Snowflake()
 
@@ -31,7 +36,7 @@ class ArticleLikeService(
         articleId: Long,
         userId: Long,
     ) {
-        articleLikeRepository.save(
+        val articleLike = articleLikeRepository.save(
             ArticleLike.from(snowflake.nextId(), articleId, userId)
         )
 
@@ -42,6 +47,18 @@ class ArticleLikeService(
             // 트래픽이 순식간에 몰릴 수 있는 상황에는 유실될 수 있으므로, 게시글 생성 시점에 미리 0으로 초기화 해둘 수도 있다.
             articleLikeCountRepository.save(ArticleLikeCount(articleId, 1L))
         }
+
+        outboxEventPublisher.publish(
+            EventType.ARTICLE_LIKED,
+            ArticleLikedEventPayload(
+                articleLikeId = articleLike.articleLikeId,
+                articleId = articleLike.articleId,
+                userId = articleLike.userId,
+                createdAt = articleLike.createdAt,
+                articleLikeCount = count(articleLike.articleId),
+            ),
+            articleLike.articleId
+        )
     }
 
     @Transactional
@@ -53,6 +70,18 @@ class ArticleLikeService(
             .ifPresent { articleLike ->
                 articleLikeRepository.delete(articleLike)
                 articleLikeCountRepository.decrease(articleId)
+
+                outboxEventPublisher.publish(
+                    EventType.ARTICLE_UNLIKED,
+                    ArticleUnlikedEventPayload(
+                        articleLikeId = articleLike.articleLikeId,
+                        articleId = articleLike.articleId,
+                        userId = articleLike.userId,
+                        createdAt = articleLike.createdAt,
+                        articleLikeCount = count(articleLike.articleId),
+                    ),
+                    articleLike.articleId
+                )
             }
     }
 

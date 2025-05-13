@@ -1,5 +1,8 @@
 package my.board.view.service
 
+import my.board.common.event.EventType
+import my.board.common.event.payload.ArticleViewedEventPayload
+import my.board.common.outboxmessagerelay.OutboxEventPublisher
 import my.board.view.entitiy.ArticleViewCount
 import my.board.view.repository.ArticleViewCountBackupRepository
 import org.springframework.stereotype.Component
@@ -8,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional
 @Component
 class ArticleViewCountBackUpProcessor(
     private val articleViewCountBackupRepository: ArticleViewCountBackupRepository,
+    private val outboxEventPublisher: OutboxEventPublisher,
 ) {
 
     @Transactional
@@ -24,5 +28,14 @@ class ArticleViewCountBackUpProcessor(
                     { articleViewCountBackupRepository.save(ArticleViewCount(articleId, viewCount)) }
                 )
         }
+
+        outboxEventPublisher.publish(
+            EventType.ARTICLE_VIEWED,
+            ArticleViewedEventPayload(
+                articleId = articleId,
+                articleViewCount = viewCount,
+            ),
+            articleId
+        )
     }
 }

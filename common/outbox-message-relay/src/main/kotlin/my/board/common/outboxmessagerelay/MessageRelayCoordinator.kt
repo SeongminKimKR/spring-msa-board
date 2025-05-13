@@ -28,7 +28,7 @@ class MessageRelayCoordinator(
 
     private fun generateKey(): String = "message-relay-coordinator::app-list::%s".format(applicationName)
 
-    @Scheduled(fixedDelay = Companion.PING_INTERVAL_SECONDS, timeUnit = TimeUnit.SECONDS)
+    @Scheduled(fixedDelay = PING_INTERVAL_SECONDS, timeUnit = TimeUnit.SECONDS)
     fun ping() {
         redisTemplate.executePipelined(RedisCallback<Any> { action ->
             val conn = action as StringRedisConnection
