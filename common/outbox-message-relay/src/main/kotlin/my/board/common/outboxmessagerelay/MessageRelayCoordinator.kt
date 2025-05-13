@@ -2,13 +2,14 @@ package my.board.common.outboxmessagerelay
 
 import jakarta.annotation.PreDestroy
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.data.redis.connection.RedisConnection
 import org.springframework.data.redis.connection.StringRedisConnection
 import org.springframework.data.redis.core.RedisCallback
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 import java.time.Instant
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.TimeUnit
 
 @Component
@@ -33,12 +34,12 @@ class MessageRelayCoordinator(
         redisTemplate.executePipelined(RedisCallback<Any> { action ->
             val conn = action as StringRedisConnection
             val key = generateKey()
-
+            
             conn.zAdd(key, Instant.now().toEpochMilli().toDouble(), APP_ID)
-            conn.zRemRange(
+            conn.zRemRangeByScore(
                 key,
-                Double.NEGATIVE_INFINITY.toLong(),
-                Instant.now().minusSeconds(PING_INTERVAL_SECONDS * PING_FAILURE_THRESHOLD).toEpochMilli()
+                Double.NEGATIVE_INFINITY,
+                Instant.now().minusSeconds((PING_INTERVAL_SECONDS * PING_FAILURE_THRESHOLD)).toEpochMilli().toDouble()
             )
             null
         } as RedisCallback<*>)
