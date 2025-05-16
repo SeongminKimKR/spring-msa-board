@@ -1,7 +1,6 @@
 package my.board.hotarticle.service
 
 import io.kotest.core.spec.style.FunSpec
-import io.kotest.matchers.shouldBe
 import io.mockk.Runs
 import io.mockk.every
 import io.mockk.just
