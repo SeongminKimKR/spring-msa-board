@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service
 @Service
 class HotArticleService(
     private val articleClient: ArticleClient,
-    private val eventHandlers: List<EventHandler<EventPayload>>,
+    private val eventHandlers: List<EventHandler<*>>,
     private val hotArticleScoreUpdater: HotArticleScoreUpdater,
     private val hotArticleListRepository: HotArticleListRepository,
 ) {
@@ -37,7 +37,8 @@ class HotArticleService(
     }
 
     private fun findEventHandler(event: Event<EventPayload>): EventHandler<EventPayload>? =
-        eventHandlers.firstOrNull { eventHandler -> eventHandler.supports(event) }
+        eventHandlers.filterIsInstance<EventHandler<EventPayload>>() // 안전하게 캐스팅
+            .firstOrNull { eventHandler -> eventHandler.supports(event) }
 
     private fun isArticleCreatedOrDeleted(event: Event<EventPayload>): Boolean =
         EventType.ARTICLE_CREATED == event.type || EventType.ARTICLE_DELETED == event.type

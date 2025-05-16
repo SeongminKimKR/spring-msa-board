@@ -2,7 +2,6 @@ package my.board.hotarticle.service.eventhandler
 
 import my.board.common.event.Event
 import my.board.common.event.EventType
-import my.board.common.event.payload.CommentCreatedEventPayload
 import my.board.common.event.payload.CommentDeletedEventPayload
 import my.board.hotarticle.repository.ArticleCommentCountRepository
 import my.board.hotarticle.utils.TimeCalculatorUtils
