@@ -44,7 +44,8 @@ class ArticleReadService(
     }
 
     private fun findEventHandler(event: Event<EventPayload>): List<EventHandler<EventPayload>> =
-        eventHandlers.filterIsInstance<EventHandler<EventPayload>>() // 안전하게 캐스팅
+        eventHandlers.filterIsInstance<EventHandler<EventPayload>>()
+            .filter { it.supports(event) }// 안전하게 캐스팅
 
     private fun fetch(articleId: Long): ArticleQueryModel? {
         val articleQueryModel = articleClient.read(articleId)?.let { article ->
