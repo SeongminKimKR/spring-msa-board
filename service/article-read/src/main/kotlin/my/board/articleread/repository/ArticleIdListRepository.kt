@@ -8,7 +8,7 @@ import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Repository
 
 @Repository
-class ArticleListRepository(
+class ArticleIdListRepository(
     private val redisTemplate: StringRedisTemplate,
 ) {
     fun add(

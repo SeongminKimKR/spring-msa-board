@@ -1,9 +1,12 @@
 package my.board.articleread.repository
 
 import my.board.common.dataserializer.DataSerializer
+import my.board.common.dataserializer.DataSerializer.deserialize
 import org.springframework.data.redis.core.StringRedisTemplate
 import org.springframework.stereotype.Repository
 import java.time.Duration
+import java.util.*
+
 
 @Repository
 class ArticleQueryModelRepository(
@@ -38,6 +41,15 @@ class ArticleQueryModelRepository(
     private fun generateKey(articleQueryModel: ArticleQueryModel): String = generateKey(articleQueryModel.articleId)
 
     private fun generateKey(articleId: Long): String = KEY_FORMAT.format(articleId)
+    fun readAll(articleIds: List<Long>): Map<Long, ArticleQueryModel> {
+        val keyList = articleIds.map(this::generateKey)
+        return redisTemplate.opsForValue()
+            .multiGet(keyList)
+            .orEmpty()
+            .filterNotNull()
+            .mapNotNull { json -> deserialize(json, ArticleQueryModel::class.java) }
+            .associateBy { it.articleId }
+    }
 
     companion object {
         // article-read::article::{articleId}

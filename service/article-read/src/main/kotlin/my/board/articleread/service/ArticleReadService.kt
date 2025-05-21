@@ -4,9 +4,12 @@ import my.board.articleread.client.ArticleClient
 import my.board.articleread.client.CommentClient
 import my.board.articleread.client.LikeClient
 import my.board.articleread.client.ViewClient
+import my.board.articleread.repository.ArticleIdListRepository
 import my.board.articleread.repository.ArticleQueryModel
 import my.board.articleread.repository.ArticleQueryModelRepository
+import my.board.articleread.repository.BoardArticleCountRepository
 import my.board.articleread.service.eventhandler.EventHandler
+import my.board.articleread.service.response.ArticleReadPageResponse
 import my.board.articleread.service.response.ArticleReadResponse
 import my.board.common.event.Event
 import my.board.common.event.EventPayload
@@ -22,6 +25,8 @@ class ArticleReadService(
     private val likeClient: LikeClient,
     private val viewClient: ViewClient,
     private val articleQueryModelRepository: ArticleQueryModelRepository,
+    private val articleIdListRepository: ArticleIdListRepository,
+    private val boardArticleCountRepository: BoardArticleCountRepository,
     private val eventHandlers: List<EventHandler<*>>,
 ) {
     private val logger = LoggerFactory.getLogger(ArticleReadService::class.java)
@@ -40,6 +45,27 @@ class ArticleReadService(
         return ArticleReadResponse.from(
             articleQueryModel,
             viewClient.count(articleId)
+        )
+    }
+
+    fun readAll(
+        boardId: Long,
+        page: Long,
+        pageSize: Long,
+    ): ArticleReadPageResponse {
+        return ArticleReadPageResponse.of(
+            readAll(readAllArticleIds(boardId, page, pageSize)),
+            count(boardId)
+        )
+    }
+
+    fun readAllInfiniteScroll(
+        boardId: Long,
+        lastArticleId: Long?,
+        pageSize: Long,
+    ): List<ArticleReadResponse> {
+        return readAll(
+            readAllInfiniteScrollArticleIds(boardId, lastArticleId, pageSize)
         )
     }
 
@@ -63,5 +89,52 @@ class ArticleReadService(
         )
 
         return articleQueryModel
+    }
+
+    private fun readAll(articleIds: List<Long>): List<ArticleReadResponse> {
+        val articleQueryModelMap: Map<Long, ArticleQueryModel> = articleQueryModelRepository.readAll(articleIds)
+        return articleIds.mapNotNull { articleId -> articleQueryModelMap[articleId] ?: fetch(articleId) }
+            .map { articleQueryModel ->
+                ArticleReadResponse.from(
+                    articleQueryModel,
+                    viewClient.count(articleQueryModel.articleId)
+                )
+            }
+    }
+
+    private fun readAllArticleIds(
+        boardId: Long,
+        page: Long,
+        pageSize: Long,
+    ): List<Long> {
+        val articleIds = articleIdListRepository.readAll(boardId, (page - 1) * pageSize, pageSize)
+        return if (pageSize == articleIds.size.toLong()) {
+            logger.info("[ArticleReadService.readAllArticleIds] return redis data.")
+            articleIds
+        } else {
+            logger.info("[ArticleReadService.readAllArticleIds] return origin data.")
+            articleClient.readAll(boardId, page, pageSize)
+                .articles.map(ArticleClient.Companion.ArticleResponse::articleId)
+        }
+    }
+
+    private fun count(boardId: Long): Long {
+        return boardArticleCountRepository.read(boardId)
+    }
+
+    private fun readAllInfiniteScrollArticleIds(
+        boardId: Long,
+        lastArticleId: Long?,
+        pageSize: Long,
+    ): List<Long> {
+        val articleIds = articleIdListRepository.readAllInfiniteScroll(boardId, lastArticleId, pageSize)
+        return if(pageSize == articleIds.size.toLong()) {
+            logger.info("[ArticleReadService.readAllInfiniteScrollArticleIds] return redis data.")
+            articleIds
+        } else {
+            logger.info("[ArticleReadService.readAllInfiniteScrollArticleIds] return origin data.")
+            articleClient.readAllInfiniteScroll(boardId, lastArticleId, pageSize)
+                .map(ArticleClient.Companion.ArticleResponse::articleId)
+        }
     }
 }
