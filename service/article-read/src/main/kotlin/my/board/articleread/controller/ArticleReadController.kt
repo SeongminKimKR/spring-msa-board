@@ -22,7 +22,7 @@ class ArticleReadController(
         @RequestParam("pageSize") pageSize: Long,
     ): ArticleReadPageResponse = articleReadService.readAll(boardId, page, pageSize)
 
-    @GetMapping("/v1/articles/infinite=scroll")
+    @GetMapping("/v1/articles/infinite-scroll")
     fun readAllInfiniteScroll(
         @RequestParam("boardId") boardId: Long,
         @RequestParam("lastArticleId") lastArticleId: Long?,
