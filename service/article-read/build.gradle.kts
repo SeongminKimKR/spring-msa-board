@@ -5,6 +5,7 @@ dependencies {
     testImplementation("io.mockk:mockk:1.13.4")
     implementation(project(":common:event"))
     implementation(project(":common:data-serializer"))
+    implementation("org.springframework.boot:spring-boot-starter-aop")
 }
 
 
