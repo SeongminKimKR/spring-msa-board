@@ -14,25 +14,19 @@ object DataSerializer {
     private fun initialize(): ObjectMapper =
         jacksonObjectMapper().registerModules(JavaTimeModule())
 
-    fun <T> deserialize(data: String?, clazz: Class<T>): T? {
-        try {
-            return objectMapper.readValue(data, clazz)
-        } catch (e: JsonProcessingException) {
-            logger.error("[DataSerializer.deserialize] data={}, clazz={}", data, clazz, e)
-            return null
-        }
+    fun <T> deserialize(data: String?, clazz: Class<T>): T? = try {
+        objectMapper.readValue(data, clazz)
+    } catch (e: JsonProcessingException) {
+        logger.error("[DataSerializer.deserialize] data={}, clazz={}", data, clazz, e)
+        null
     }
 
-    fun <T> deserialize(data: Any?, clazz: Class<T>): T {
-        return objectMapper.convertValue(data, clazz)
-    }
+    fun <T> deserialize(data: Any?, clazz: Class<T>): T = objectMapper.convertValue(data, clazz)
 
-    fun serialize(`object`: Any?): String? {
-        try {
-            return objectMapper.writeValueAsString(`object`)
-        } catch (e: JsonProcessingException) {
-            logger.error("[DataSerializer.serialize] object={}", `object`, e)
-            return null
-        }
-    }
+    fun serialize(`object`: Any?): String? = try {
+        objectMapper.writeValueAsString(`object`)
+     } catch (e: JsonProcessingException) {
+         logger.error("[DataSerializer.serialize] object={}", `object`, e)
+         null
+     }
 }

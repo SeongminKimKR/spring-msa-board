@@ -33,7 +33,7 @@ class Event<T : EventPayload>(
             return of(eventRaw.eventId, eventType, payload)
         }
 
-        data class EventRaw(
+        private data class EventRaw(
             val eventId: Long,
             val type: String,
             val payload: Any,
