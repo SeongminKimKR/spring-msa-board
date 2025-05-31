@@ -31,19 +31,16 @@ class MessageRelay(
         publishEvent(outboxEvent.outbox)
     }
 
-    private fun publishEvent(outbox: Outbox) {
-        try {
-            messageRelayKafkaTemplate.send(
-                outbox.eventType.topic,
-                outbox.shardKey.toString(),
-                outbox.payload
-            ).get(1, TimeUnit.SECONDS)
+    private fun publishEvent(outbox: Outbox) = try {
+        messageRelayKafkaTemplate.send(
+            outbox.eventType.topic,
+            outbox.shardKey.toString(),
+            outbox.payload
+        ).get(1, TimeUnit.SECONDS)
 
-            outboxRepository.delete(outbox)
-        } catch (e: Exception) {
-            logger.error("[MessageRelay.publishEvent] outbox={}", outbox, e)
-        }
-
+        outboxRepository.delete(outbox)
+    } catch (e: Exception) {
+        logger.error("[MessageRelay.publishEvent] outbox={}", outbox, e)
     }
 
     @Scheduled(
