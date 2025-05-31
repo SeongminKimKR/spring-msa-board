@@ -18,16 +18,14 @@ class ArticleClient(
         RestClient.create(articleServerUrl)
     }
 
-    fun read(articleId: Long): ArticleResponse? {
-        return try {
-            restClient.get()
-                .uri("/v1/articles/{articleId}", articleId)
-                .retrieve()
-                .body(ArticleResponse::class.java)
-        } catch (e: Exception) {
-            logger.error("[ArticleClient.read] articleId={}", articleId, e)
-            null
-        }
+    fun read(articleId: Long): ArticleResponse? = try {
+        restClient.get()
+            .uri("/v1/articles/{articleId}", articleId)
+            .retrieve()
+            .body(ArticleResponse::class.java)
+    } catch (e: Exception) {
+        logger.error("[ArticleClient.read] articleId={}", articleId, e)
+        null
     }
 
     companion object {

@@ -4,6 +4,7 @@ import org.slf4j.LoggerFactory
 import org.springframework.data.redis.connection.StringRedisConnection
 import org.springframework.data.redis.core.RedisCallback
 import org.springframework.data.redis.core.StringRedisTemplate
+import org.springframework.data.redis.core.ZSetOperations
 import org.springframework.stereotype.Repository
 import java.time.Duration
 import java.time.LocalDateTime
@@ -37,7 +38,7 @@ class HotArticleListRepository(
             ?.onEach { tuple ->
                 logger.info("[HotArticleListRepository.readAll] articleId={}, score={}", tuple.value, tuple.score)
             }
-            ?.mapNotNull { it.value?.toString()?.toLongOrNull() }
+            ?.mapNotNull { tuple: ZSetOperations.TypedTuple<String> -> tuple.value?.toString()?.toLongOrNull() }
             ?: emptyList()
     }
 

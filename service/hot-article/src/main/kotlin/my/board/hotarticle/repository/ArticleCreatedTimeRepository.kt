@@ -7,6 +7,10 @@ import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 
+/***
+ * 좋아요, 댓글, 조회 이벤트가 발생했을 때 게시글이 오늘 게시글인지 확인하려면, 게시글 서비스에 조회가 필요
+ * 하지만 게시글 생성 시간을 저장하고 있으면, 오늘 게시글인지 게시글 서비스에 조회하지 않고 여기에서 조회하면 됨
+ */
 @Repository
 class ArticleCreatedTimeRepository (
     private val redisTemplate: StringRedisTemplate,
