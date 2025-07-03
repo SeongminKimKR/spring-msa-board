@@ -3,6 +3,10 @@ package my.board.common.snowflake
 import java.util.random.RandomGenerator
 
 class Snowflake {
+    private val nodeId = RandomGenerator.getDefault().nextLong(maxNodeId + 1)
+    private var lastTimeMillis = startTimeMillis
+    private var sequence = 0L
+
     @Synchronized
     fun nextId(): Long {
         var currentTimeMillis = System.currentTimeMillis()
@@ -42,12 +46,10 @@ class Snowflake {
         const val maxNodeId: Long = (1L shl NODE_ID_BITS) - 1
         const val maxSequence: Long = (1L shl SEQUENCE_BITS) - 1
 
-        private val nodeId = RandomGenerator.getDefault().nextLong(maxNodeId + 1)
 
         // UTC = 2024-01-01T00:00:00Z
         private const val startTimeMillis = 1704067200000L
 
-        private var lastTimeMillis = startTimeMillis
-        private var sequence = 0L
+
     }
 }
